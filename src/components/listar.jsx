@@ -9,6 +9,8 @@ export default function Listar({
 }) {
   const [mostrarModal, setMostrarModal] = useState(false);
   const [busqueda, setBusqueda] = useState("");
+  const [ordenadoPorReproducciones, setOrdenadoPorReproducciones] = useState(false);
+
 
   const handleManejarReproducir = (id) => {
     const nuevaLista = lista.map((video) => {
@@ -38,11 +40,18 @@ export default function Listar({
     setBusqueda(e.target.value);
   };
 
+  const handleOrdenar = () => {
+    setOrdenadoPorReproducciones(!ordenadoPorReproducciones);
+  };
+
   const listaFiltrada = lista
-    .filter((video) =>
-      video.nombre.toLowerCase().includes(busqueda.toLowerCase())
-    )
-    .sort((a, b) => b.contador - a.contador);
+    .filter((video) => video.nombre.toLowerCase().includes(busqueda.toLowerCase()))
+    .sort((a, b) => {
+      if (ordenadoPorReproducciones) {
+        return b.contador - a.contador;
+      }
+      return 0;
+    });
 
   return (
     <div className="container">
@@ -53,16 +62,18 @@ export default function Listar({
         onChange={handleBusqueda}
         className="input"
       />
+
+      <button onClick={handleOrdenar} className="sort-btn">
+        {ordenadoPorReproducciones ? "Ordenar por ingreso" : "Ordenar por reproducciones"}
+      </button>
+
       <h2 className="title">Lista de Canciones</h2>
       <ul className="song-list">
         {listaFiltrada.map((video) => (
           <li key={video.id} className="song-item">
             <span className="song-name">{video.nombre}</span>
             <span className="counter">Reproducciones: {video.contador}</span>
-            <button
-              className="play-btn"
-              onClick={() => handleManejarReproducir(video.id)}
-            >
+            <button className="play-btn" onClick={() => handleManejarReproducir(video.id)}>
               Reproducir
             </button>
           </li>
@@ -72,9 +83,7 @@ export default function Listar({
       {mostrarModal && videoActivo && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <button className="close-btn" onClick={handleCerrarModal}>
-              Cerrar
-            </button>
+            <button className="close-btn" onClick={handleCerrarModal}>Cerrar</button>
             <Video videoId={videoActivo} />
           </div>
         </div>
